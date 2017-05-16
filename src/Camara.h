@@ -47,13 +47,11 @@ Camara::Camara(glm::vec3 position, glm::vec3 direction, GLfloat sensitivity, GLf
 	glm::vec3 up = glm::vec3(0.f, 1.f, 0.f); // world
 	camUp = glm::cross(camDir, camRight);
 
-	//camRight = glm::normalize(glm::cross(camDir, camUp));
 }
 
 void Camara::DoMoviment(GLFWwindow *window, GLfloat delta)
 {
 	camSpeed = 10*delta * 3;
-//	glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
 	int FORWARD = glfwGetKey(window, GLFW_KEY_W);
 	int BACKWARD = glfwGetKey(window, GLFW_KEY_S);
 	int RIGHT = glfwGetKey(window, GLFW_KEY_D);

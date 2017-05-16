@@ -10,6 +10,7 @@
 #include <chrono>
 #include "Model.h"
 #include "Object.h"
+#include <vector>
 
 using namespace std;
 const GLint WIDTH = 800, HEIGHT = 600;
@@ -43,7 +44,51 @@ void Do_Moviment(GLFWwindow *window);
 
 glm::vec3 lightPos(0.f, 2.f, 3.0f); // posición de la luz
 
+GLuint loadCubemap(vector<const GLchar*> faces)
+{
+	GLuint textureID;
+	glGenTextures(1, &textureID);
 
+	int width, height;
+	unsigned char* image;
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	for (GLuint i = 0; i < faces.size(); i++)
+	{
+		image = SOIL_load_image(faces[i], &width, &height, 0, SOIL_LOAD_RGB);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		SOIL_free_image_data(image);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	return textureID;
+}
+GLuint loadTexture(GLchar* path)
+{
+	//Generate texture ID and load texture data 
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	int width, height;
+	unsigned char* image = SOIL_load_image(path, &width, &height, 0, SOIL_LOAD_RGB);
+	// Assign texture to ID
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	// Parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	SOIL_free_image_data(image);
+	return textureID;
+}
 int main() {
 	//initGLFW
 	auto t_start = std::chrono::high_resolution_clock::now();
@@ -66,7 +111,6 @@ int main() {
 	}
 
 	glfwMakeContextCurrent(window);
-
 
 	//set GLEW and inicializate
 	glewExperimental = GL_TRUE;
@@ -116,6 +160,9 @@ int main() {
 	//Multilight
 	Shader multiShader("./src/multilight.v", "./src/multilight.f");
 
+	//Skybox
+	Shader skyShader("./src/skybox.v", "./src/skybox.f");
+	Shader shader("./src/advanced.vs", "./src/advanced.frag");
 	//Objects
 
 	glm::vec3 lightPositions[] = {
@@ -231,6 +278,72 @@ int main() {
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+	//Skybox
+	GLfloat skyboxVertices[] = {
+		// Positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f
+	};
+
+	GLuint skyboxVAO, skyboxVBO;
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glBindVertexArray(0);
+
+	// Cubemap (Skybox)
+	vector<const GLchar*> faces;
+	faces.push_back("./src/right.jpg");
+	faces.push_back("./src/left.jpg");
+	faces.push_back("./src/top.jpg");
+	faces.push_back("./src/bottom.jpg");
+	faces.push_back("./src/back.jpg");
+	faces.push_back("./src/front.jpg");
+	GLuint cubemapTexture = loadCubemap(faces);
+
 	// load textures, cubo simple
 	/*
 	int width, height;
@@ -297,13 +410,16 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	//Cube Maps
 
+	
 	//ordre dels vertex dels triangles del quadrat
 	GLuint indexBufferObject[] = {
 		0, 1, 3,
 		1, 2, 3
 	};
 
+	//Inicializar objetos
 	bigC.Initiate();
 	miniCube.Initiate();
 	pointCube1.Initiate();
@@ -312,6 +428,7 @@ int main() {
 	spotCube2.Initiate();
 	directional.Initiate();
 	bigCube.Initiate();
+
 	// Crear los VBO, VAO y EBO y reservar memoria para el VAO, VBO y EBO
 	/*
 	GLuint VAO;
@@ -379,8 +496,8 @@ int main() {
 
 	GLint uniView8 = glGetUniformLocation(multiShader.Program, "view");
 	GLint uniProj8 = glGetUniformLocation(multiShader.Program, "proj");
-	//Matrius
 
+	//Matrius
 	glm::mat4 model;
 
 	GLfloat radio = 8.0f;
@@ -389,11 +506,9 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	//Raton
-
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	//Inicializar algunos parámetros de los cubos
-
 	bigC.Scale(cubScal);
 	miniCube.Move(glm::vec3(0.f, 2.f, 3.0f));
 	miniCube.Scale(glm::vec3(0.1f, 0.1f, 0.1f));
@@ -439,8 +554,6 @@ int main() {
 		//Gets the time
 		auto t_now = std::chrono::high_resolution_clock::now();
 		float time = std::chrono::duration_cast<std::chrono::duration<float>>(t_now - t_start).count();
-
-
 
 		glm::mat4 proj = glm::perspective(glm::radians(cam.GetFOV()), aspectRatio, 1.0f, 1000.0f);
 
@@ -489,10 +602,7 @@ int main() {
 		glUniform1i(glGetUniformLocation(textureShader.Program, "tex2"), 1);
 		*/
 
-		
-
 		//Shader a canviar per sa iluminació
-		multiShader.USE();
 
 		bigC.Move(cubPos);
 		bigC.Rotate(cubRot);
@@ -626,6 +736,8 @@ int main() {
 #endif
 		//multilight
 #if(true)
+		multiShader.USE();
+
 		glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
 		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
 
@@ -683,16 +795,13 @@ int main() {
 		glUniformMatrix4fv(uniView8, 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniProj8, 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(glGetUniformLocation(multiShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(bigC.GetModelMatrix())); // transferir el que val model al uniform on apunta uniModel
-
-
-
-
-																																   //activar texturas cubo de luz
+																														   //activar texturas cubo de luz
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
 
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, specularMap);
+
 #endif
 		bigC.Draw();
 		bigCube.Draw();
@@ -723,9 +832,6 @@ int main() {
 		glUniformMatrix4fv(uniView3, 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniProj3, 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
 		pointCube1.Draw();
-
-		
-
 
 		//bind antic VAO
 		/*glBindVertexArray(VAO); {
@@ -922,22 +1028,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		cubRot.x = 0.05f;
 	else if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE)
 		cubRot.x = 0.f;
-
-
-
-
 }
 
 void mouseController(GLFWwindow* window, double xpos, double ypos) { // working!
-
 	cam.MouseMove(window, xpos, ypos);
 }
 
 
 //Zoom. Cambia el FOV
 void scroller(GLFWwindow *window, double xoffset, double yoffset) {
-
 	cam.MouseScroll(window, xoffset, yoffset);
-
-
 }
+
