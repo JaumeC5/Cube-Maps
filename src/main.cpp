@@ -33,9 +33,6 @@ glm::vec3 cubRot = glm::vec3(0.f, 0.f, 0.f);
 glm::vec3 cubScal = glm::vec3(0.8f, 0.8f, 0.8f);
 glm::vec3 cubPos = glm::vec3(0.f, 0.f, 0.f);
 
-
-
-
 void mouseController(GLFWwindow* window, double xpos, double ypos);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroller(GLFWwindow* window, double xoffset, double yoffset);
@@ -67,7 +64,6 @@ int main() {
 
 	glfwMakeContextCurrent(window);
 
-
 	//set GLEW and inicializate
 	glewExperimental = GL_TRUE;
 	if (GLEW_OK != glewInit()) {
@@ -87,7 +83,6 @@ int main() {
 	glfwSetCursorPosCallback(window, mouseController);
 	glfwSetScrollCallback(window, scroller);
 
-
 	//fondo
 	glClearColor(0.5, 0, 0.5, 1.0);
 
@@ -97,22 +92,16 @@ int main() {
 	Shader cubeShader("./src/cubeVertex.v", "./src/cubeFragment.f");
 	Shader modelShader("./src/modelVertex.v", "./src/modelFrag.f");
 	Shader miniCubo1("./src/minicube1v.v", "./src/minicube1f.f");
-
 	//Material
 	Shader materialShader("./src/material.v", "./src/material.f");
-
 	//Material y textura
 	Shader niceCubem8("./src/textMat.v", "./src/textMat.f");
-
 	//Direcional
 	Shader lightShader("./src/vertexLC.v", "./src/fragLC.f");
-
 	//Puntual
 	Shader pointShader("./src/pointLight.v", "./src/pointLight.f");
-
 	//Focal
 	Shader spotShader("./src/spotLight.v", "./src/spotLight.f");
-
 	//Multilight
 	Shader multiShader("./src/multilight.v", "./src/multilight.f");
 
@@ -148,29 +137,27 @@ int main() {
 	//cuadrado
 	GLfloat vertexBufferObject[] = {
 
-		0.5f, 0.5f, 0.f, //  0. top right
-		0.5f, -0.5f, 0.f,//   1. bot right
-		-0.5f, -0.5f, 0.f,//    2. bot left
-		-0.5f, 0.5f, 0.f, //  3. top left
+		0.5f, 0.5f, 0.f,   //  0. top right
+		0.5f, -0.5f, 0.f,  //  1. bot right
+		-0.5f, -0.5f, 0.f, //  2. bot left
+		-0.5f, 0.5f, 0.f,  //  3. top left
 
 	};
 
 	//textura
 	GLfloat vertices[] = {
-		//  Position      Color             Texcoords
-		-0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
-		0.5f,  0.5f,0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Top-right
-		0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
-		-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f  // Bottom-left
+		//  Position             Color         Texcoords
+		-0.5f,  0.5f, 0.0f,  1.0f, 0.0f,   0.0f, 0.0f, 0.0f, // Top-left
+		 0.5f,  0.5f, 0.0f,  0.0f, 1.0f,   0.0f, 1.0f, 0.0f, // Top-right
+		 0.5f, -0.5f, 0.0f,  0.0f, 0.0f,   1.0f, 1.0f, 1.0f, // Bottom-right
+		-0.5f, -0.5f, 0.0f,  1.0f, 1.0f,   1.0f, 0.0f, 1.0f  // Bottom-left
 	};
 
 	GLfloat textureBufferObject[] = {
-
-		0.5f, 0.5f, 0.f, //  0. top right
-		0.5f, -0.5f, 0.f,//   1. bot right
-		-0.5f, -0.5f, 0.f,//    2. bot left
-		-0.5f, 0.5f, 0.f, //  3. top left
-
+		 0.5f, 0.5f, 0.f,   //  0. top right
+		 0.5f, -0.5f, 0.f,  //  1. bot right
+		-0.5f, -0.5f, 0.f,  //  2. bot left
+		-0.5f, 0.5f, 0.f,   //  3. top left
 	};
 
 	//cubo simple
@@ -275,6 +262,7 @@ int main() {
 	glGenTextures(1, &specularMap);
 	int width, height;
 	unsigned char* image;
+
 	// Diffuse map
 	image = SOIL_load_image("./src/sapphire.jpg", &width, &height, 0, SOIL_LOAD_RGB);
 	glBindTexture(GL_TEXTURE_2D, diffuseMap);
@@ -285,6 +273,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+
 	// Specular map
 	image = SOIL_load_image("./src/sapphire_specular.jpg", &width, &height, 0, SOIL_LOAD_RGB);
 	glBindTexture(GL_TEXTURE_2D, specularMap);
@@ -296,7 +285,6 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
 
 	//ordre dels vertex dels triangles del quadrat
 	GLuint indexBufferObject[] = {
@@ -312,6 +300,7 @@ int main() {
 	spotCube2.Initiate();
 	directional.Initiate();
 	bigCube.Initiate();
+
 	// Crear los VBO, VAO y EBO y reservar memoria para el VAO, VBO y EBO
 	/*
 	GLuint VAO;
@@ -347,9 +336,9 @@ int main() {
 	glEnableVertexAttribArray(2);
 
 	//////////////Finishes config for the cube//////////////////////
-	*/
+*/
 
-	GLint variableShader = glGetUniformLocation(squareShader.Program, "Sion"); //enllaçar amb variable dins els " "
+	GLint variableShader = glGetUniformLocation(squareShader.Program, "Sion"); //Enlazar con la variable dentro de los " "
 	GLint imgSwitcher = glGetUniformLocation(textureShader.Program, "alternador");
 	GLint uniTrans = glGetUniformLocation(textureShader.Program, "trans");
 	GLint uniView = glGetUniformLocation(textureShader.Program, "view");
@@ -379,8 +368,8 @@ int main() {
 
 	GLint uniView8 = glGetUniformLocation(multiShader.Program, "view");
 	GLint uniProj8 = glGetUniformLocation(multiShader.Program, "proj");
+	
 	//Matrius
-
 	glm::mat4 model;
 
 	GLfloat radio = 8.0f;
@@ -389,11 +378,9 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	//Raton
-
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	//Inicializar algunos parámetros de los cubos
-
 	bigC.Scale(cubScal);
 	miniCube.Move(glm::vec3(0.f, 2.f, 3.0f));
 	miniCube.Scale(glm::vec3(0.1f, 0.1f, 0.1f));
@@ -409,7 +396,6 @@ int main() {
 
 	pointCube2.Move(lightPositions[3]);
 	pointCube2.Scale(glm::vec3(0.1f, 0.1f, 0.1f));
-
 
 	directional.Move(lightPositions[4]);
 	directional.Scale(glm::vec3(0.1f, 0.1f, 0.1f));
@@ -439,8 +425,6 @@ int main() {
 		//Gets the time
 		auto t_now = std::chrono::high_resolution_clock::now();
 		float time = std::chrono::duration_cast<std::chrono::duration<float>>(t_now - t_start).count();
-
-
 
 		glm::mat4 proj = glm::perspective(glm::radians(cam.GetFOV()), aspectRatio, 1.0f, 1000.0f);
 
@@ -488,8 +472,6 @@ int main() {
 		glBindTexture(GL_TEXTURE_2D, texture2);
 		glUniform1i(glGetUniformLocation(textureShader.Program, "tex2"), 1);
 		*/
-
-		
 
 		//Shader a canviar per sa iluminació
 		multiShader.USE();
@@ -938,6 +920,5 @@ void mouseController(GLFWwindow* window, double xpos, double ypos) { // working!
 void scroller(GLFWwindow *window, double xoffset, double yoffset) {
 
 	cam.MouseScroll(window, xoffset, yoffset);
-
 
 }
