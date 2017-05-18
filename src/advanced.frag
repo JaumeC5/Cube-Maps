@@ -1,10 +1,14 @@
 #version 330 core
-
+in vec3 Normal;
+in vec3 Position;
 out vec4 color;
-in vec3 textureDir; // Direction vector representing a 3D texture coordinate
-uniform samplerCube cubemap;  // Cubemap texture sampler
+
+uniform vec3 cameraPos;
+uniform samplerCube skybox;
 
 void main()
 {             
-    color = texture(cubemap, textureDir);
-}  
+    vec3 I = normalize(Position - cameraPos);
+    vec3 R = reflect(I, normalize(Normal));
+    color = texture(skybox, R);
+}
