@@ -35,9 +35,6 @@
     <ClInclude Include="Model.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="src\Mesh.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
@@ -48,6 +45,9 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="src\Camara.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Object.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
@@ -135,6 +135,24 @@
     </None>
     <None Include="src\vertexLC.v">
       <Filter>Archivos de recursos\Materials</Filter>
+    </None>
+    <None Include="src\advanced.frag">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="src\advanced.vs">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="src\skybox.frag">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="src\skybox.vs">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="src\refractionCube.frag">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="src\refractionCube.vs">
+      <Filter>Archivos de recursos</Filter>
     </None>
   </ItemGroup>
 </Project>

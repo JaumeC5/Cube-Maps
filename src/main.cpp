@@ -53,14 +53,14 @@ GLuint loadTexture(GLchar* path);
 GLuint loadCubemap(vector<const GLchar*> faces);
 
 // Camera
-Camara camera(glm::vec3(0.0f, 0.0f, 3.f), glm::normalize(glm::vec3(0.f, 0.f, 3.f) - glm::vec3(0.f, 0.f, 0.f)), 0.1, 20);
+Camara camera(glm::vec3(0.0f, 0.0f, 3.f), glm::normalize(glm::vec3(0.f, 0.f, 3.f) - glm::vec3(0.f, 0.f, 0.f)), 0.05, 20);
 bool keys[1024];
 
 GLfloat lastFrame = 0.0f;
 
 glm::vec3 lightColor = glm::vec3(0.6f, 0.0f, 0.5);
 
-Camara cam(glm::vec3(0.0f, 0.0f, 3.f), glm::normalize(glm::vec3(0.f, 0.f, 3.f) - glm::vec3(0.f, 0.f, 0.f)), 0.1, 20);
+Camara cam(glm::vec3(0.0f, 0.0f, 3.f), glm::normalize(glm::vec3(0.f, 0.f, 3.f) - glm::vec3(0.f, 0.f, 0.f)), 0.05, 20);
 
 glm::vec3 cubRot = glm::vec3(0.f, 0.f, 0.f);
 glm::vec3 cubScal = glm::vec3(0.8f, 0.8f, 0.8f);
@@ -75,7 +75,7 @@ int main()//fgh
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "Salt begins", nullptr, nullptr); // Windowed
+	GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "Cubemaps", nullptr, nullptr); // Windowed
 	glfwMakeContextCurrent(window);
 
 	// Set the required callback functions
@@ -100,6 +100,7 @@ int main()//fgh
 	// Setup and compile our shaders
 	Shader shader("./src/advanced.vs", "./src/advanced.frag");
 	Shader skyboxShader("./src/skybox.vs", "./src/skybox.frag");
+	Shader refractionShader("./src/refractionCube.vs", "./src/refractionCube.frag");
 
 	Shader squareShader("./src/SimpleVertexShader.vertexshader", "./src/SimpleFragmentShader.fragmentshader");
 	Shader textureShader("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
@@ -339,6 +340,7 @@ int main()//fgh
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+
 	glBindVertexArray(0);
 	// Setup skybox VAO
 	GLuint skyboxVAO, skyboxVBO;
@@ -524,7 +526,7 @@ int main()//fgh
 		view = camera.LookAt();
 
 
-		//Transparent Cube
+		//Reflection Cube
 		shader.USE();
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
@@ -535,6 +537,20 @@ int main()//fgh
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
+
+
+		//Refraction Cube
+		refractionShader.USE();
+		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
+		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniform3f(glGetUniformLocation(refractionShader.Program, "cameraPos"), camera.camPos.x, camera.camPos.y, camera.camPos.z);
+
+		//glUniform1i(glGetUniformLocation(shader.Program, "skybox"), 0);
+		glBindVertexArray(cubeVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+
 
 		multiShader.USE();
 		glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);

@@ -24,13 +24,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h" />
-    <ClInclude Include="Object.h" />
     <ClInclude Include="src\Camara.h" />
     <ClInclude Include="src\Light.h" />
     <ClInclude Include="src\Mesh.h" />
+    <ClInclude Include="src\Object.h" />
     <ClInclude Include="src\Shader.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\advanced.frag" />
+    <None Include="src\advanced.vs" />
     <None Include="src\cubeFragment.f" />
     <None Include="src\cubeVertex.v" />
     <None Include="src\fragLC.f" />
@@ -50,8 +52,12 @@
     <None Include="src\multilight.v" />
     <None Include="src\pointLight.f" />
     <None Include="src\pointLight.v" />
+    <None Include="src\refractionCube.frag" />
+    <None Include="src\refractionCube.vs" />
     <None Include="src\SimpleFragmentShader.fragmentshader" />
     <None Include="src\SimpleVertexShader.vertexshader" />
+    <None Include="src\skybox.frag" />
+    <None Include="src\skybox.vs" />
     <None Include="src\spotLight.f" />
     <None Include="src\spotLight.v" />
     <None Include="src\textMat.f" />
