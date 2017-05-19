@@ -5,6 +5,9 @@ out vec4 color;
 
 uniform vec3 cameraPos;
 uniform samplerCube skybox;
+uniform samplerCube skybox2;
+
+uniform float alternador;
 
 void main()
 {             

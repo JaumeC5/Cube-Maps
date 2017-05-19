@@ -397,6 +397,18 @@ int main()//fgh
 	faces.push_back("./src/front.jpg");
 	GLuint cubemapTexture = loadCubemap(faces);
 
+
+	vector<const GLchar*> faces2;
+
+	faces2.push_back("./src/top2.jpg");
+	faces2.push_back("./src/bottom2.jpg");
+	faces2.push_back("./src/back2.jpg");
+	faces2.push_back("./src/front2.jpg");
+	faces2.push_back("./src/right2.jpg");
+	faces2.push_back("./src/left2.jpg");
+	GLuint cubemapTexture2 = loadCubemap(faces2);
+
+
 	//ordre dels vertex dels triangles del quadrat
 	GLuint indexBufferObject[] = {
 		0, 1, 3,
@@ -522,6 +534,16 @@ int main()//fgh
 		glBindVertexArray(0);
 		glDepthMask(GL_TRUE); 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+		// skybox2
+	/*	glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE0);
+		glUniform1i(glGetUniformLocation(skyboxShader.Program, "skybox2"), 0);
+		glUniform3f(glGetUniformLocation(skyboxShader.Program, "cameraPos"), camera.camPos.x, camera.camPos.y, camera.camPos.z);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthMask(GL_TRUE);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture2);*/
 
 		view = camera.LookAt();
 
