@@ -44,6 +44,8 @@ bool firstMouse = true;
 GLfloat lastX = 400, lastY = 300;
 bool mo1, mo2, mo3 = false;
 
+int skyboxText = 1;
+
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -387,7 +389,7 @@ int main()//fgh
 
 #pragma endregion
 
-	// Cubemap (Skybox)
+	// Skybox 1
 	vector<const GLchar*> faces;
 	faces.push_back("./src/right.jpg");
 	faces.push_back("./src/left.jpg");
@@ -395,17 +397,19 @@ int main()//fgh
 	faces.push_back("./src/bottom.jpg");
 	faces.push_back("./src/back.jpg");
 	faces.push_back("./src/front.jpg");
+	
 	GLuint cubemapTexture = loadCubemap(faces);
 
+	// Skybox 2
 
 	vector<const GLchar*> faces2;
+	faces2.push_back("./src/hexagon_rt.png");
+	faces2.push_back("./src/hexagon_lf.png");
+	faces2.push_back("./src/hexagon_up.png");
+	faces2.push_back("./src/hexagon_dn.png");
+	faces2.push_back("./src/hexagon_bk.png");
+	faces2.push_back("./src/hexagon_ft.png");
 
-	faces2.push_back("./src/top2.jpg");
-	faces2.push_back("./src/bottom2.jpg");
-	faces2.push_back("./src/back2.jpg");
-	faces2.push_back("./src/front2.jpg");
-	faces2.push_back("./src/right2.jpg");
-	faces2.push_back("./src/left2.jpg");
 	GLuint cubemapTexture2 = loadCubemap(faces2);
 
 
@@ -492,8 +496,7 @@ int main()//fgh
 	bigCube.Move(glm::vec3(3.f, 1.f, 0.f));
 	bigCube.Scale(glm::vec3(5.f, 5.f, 5.f));
 	transp.Move(glm::vec3(0.f, 0.f, 0.f));
-	// Draw as wireframe
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	
 
 	// Game loop
 	while (!glfwWindowShouldClose(window))
@@ -512,7 +515,7 @@ int main()//fgh
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-		// Draw scene as normal
+		// Draw scene
 		
 		proj = glm::perspective(camera.GetFOV(), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 
@@ -533,17 +536,12 @@ int main()//fgh
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 		glDepthMask(GL_TRUE); 
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
-		// skybox2
-	/*	glBindVertexArray(skyboxVAO);
-		glActiveTexture(GL_TEXTURE0);
-		glUniform1i(glGetUniformLocation(skyboxShader.Program, "skybox2"), 0);
-		glUniform3f(glGetUniformLocation(skyboxShader.Program, "cameraPos"), camera.camPos.x, camera.camPos.y, camera.camPos.z);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
-		glDepthMask(GL_TRUE);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture2);*/
+		if(skyboxText == 1)
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+		if(skyboxText == 2)
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture2);
 
 		view = camera.LookAt();
 
@@ -555,7 +553,6 @@ int main()//fgh
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		glUniform3f(glGetUniformLocation(shader.Program, "cameraPos"), camera.camPos.x, camera.camPos.y, camera.camPos.z);
 
-		//glUniform1i(glGetUniformLocation(shader.Program, "skybox"), 0);
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
@@ -568,7 +565,6 @@ int main()//fgh
 		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		glUniform3f(glGetUniformLocation(refractionShader.Program, "cameraPos"), camera.camPos.x, camera.camPos.y, camera.camPos.z);
 
-		//glUniform1i(glGetUniformLocation(shader.Program, "skybox"), 0);
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
@@ -860,6 +856,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		cubRot.x = 0.15f;
 	else if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE)
 		cubRot.x = 0.f;
+
+	else if ((key == GLFW_KEY_1 && action == GLFW_PRESS)) {
+		skyboxText = 1;
+	}
+	else if ((key == GLFW_KEY_2 && action == GLFW_PRESS)) {
+		skyboxText = 2;
+	}
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)

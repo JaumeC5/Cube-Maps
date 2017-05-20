@@ -3,12 +3,12 @@
 in vec3 TexCoords;
 out vec4 color;
 
+uniform sampler2D tex1;
+uniform sampler2D tex2;
+
 uniform samplerCube skybox;
-//uniform samplerCube skybox2;
 
 void main()
 {    
     color = texture(skybox, TexCoords);
-
-	//color = mix(texture(skybox, TexCoords), texture(skybox2, TexCoords), alternador);
 }
