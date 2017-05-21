@@ -65,7 +65,7 @@ glm::vec3 lightColor = glm::vec3(0.6f, 0.0f, 0.5);
 Camara cam(glm::vec3(0.0f, 0.0f, 3.f), glm::normalize(glm::vec3(0.f, 0.f, 3.f) - glm::vec3(0.f, 0.f, 0.f)), 0.05, 20);
 
 glm::vec3 cubRot = glm::vec3(0.f, 0.f, 0.f);
-glm::vec3 cubScal = glm::vec3(0.8f, 0.8f, 0.8f);
+glm::vec3 cubScal = glm::vec3(0.5f, 0.5f, 0.5f);
 glm::vec3 cubPos = glm::vec3(0.f, 0.f, 0.f);
 
 int main()//fgh
@@ -109,6 +109,8 @@ int main()//fgh
 	Shader cubeShader("./src/cubeVertex.v", "./src/cubeFragment.f");
 	Shader modelShader("./src/modelVertex.v", "./src/modelFrag.f");
 	Shader miniCubo1("./src/minicube1v.v", "./src/minicube1f.f");
+	Shader whiteStar("./src/star.v", "./src/star.f");
+
 
 	//Material
 	Shader materialShader("./src/material.v", "./src/material.f");
@@ -148,10 +150,12 @@ int main()//fgh
 	Object bigCube(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.f, 1.f, 1.f), cube);
 	Object transp(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.f, 1.f, 1.f), cube);
 	//Models 3d
-#if(false)
+#if(true)
 	Model m1("./Models/m1/nanosuit.obj");
-	Model m2("./Models/m2/eagle.obj");
-	Model m3("./Models/m3/dog.obj");
+	//Model m2("./Models/m2/eagle.obj");
+	//Model m3("./Models/m3/dog.obj");
+	Model sphere("./Models/sphere/sphere.obj");
+	Model spaceship("./Models/sp/voyager.obj");
 #endif
 	// Definir el buffer de vertices
 
@@ -243,7 +247,7 @@ int main()//fgh
 
 #pragma region "object_initialization"
 	GLfloat cubeVertices[] = {
-		// Positions          // Normals
+		
 		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 		0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -412,6 +416,18 @@ int main()//fgh
 
 	GLuint cubemapTexture2 = loadCubemap(faces2);
 
+	// Skybox 3
+
+	vector<const GLchar*> faces3;
+	faces3.push_back("./src/cwd_rt.jpg");
+	faces3.push_back("./src/cwd_lf.jpg");
+	faces3.push_back("./src/cwd_up.jpg");
+	faces3.push_back("./src/cwd_dn.jpg");
+	faces3.push_back("./src/cwd_bk.jpg");
+	faces3.push_back("./src/cwd_ft.jpg");
+
+	GLuint cubemapTexture3 = loadCubemap(faces3);
+
 
 	//ordre dels vertex dels triangles del quadrat
 	GLuint indexBufferObject[] = {
@@ -464,6 +480,8 @@ int main()//fgh
 	//Matrius
 	glm::mat4 model = glm::mat4(1.0);
 	glm::mat4 proj;
+	glm::mat4 cubesModel = glm::mat4(1.0);
+	
 	GLfloat radio = 8.0f;
 
 	glm::mat4 view;
@@ -496,7 +514,7 @@ int main()//fgh
 	bigCube.Move(glm::vec3(3.f, 1.f, 0.f));
 	bigCube.Scale(glm::vec3(5.f, 5.f, 5.f));
 	transp.Move(glm::vec3(0.f, 0.f, 0.f));
-	
+	cubesModel = glm::translate(cubesModel, glm::vec3(-4.0f, 0.f, 0.f));
 
 	// Game loop
 	while (!glfwWindowShouldClose(window))
@@ -516,10 +534,9 @@ int main()//fgh
 
 
 		// Draw scene
-		
 		proj = glm::perspective(camera.GetFOV(), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 
-		glDepthMask(GL_FALSE);  // Change depth function so depth test passes when values are equal to depth buffer's content
+		glDepthMask(GL_FALSE);  
 		
 		skyboxShader.USE();
 		
@@ -543,14 +560,18 @@ int main()//fgh
 		if(skyboxText == 2)
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture2);
 
+		if (skyboxText == 3)
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture3);
+
 		view = camera.LookAt();
 
 
 		//Reflection Cube
 		shader.USE();
+		
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(cubesModel));
 		glUniform3f(glGetUniformLocation(shader.Program, "cameraPos"), camera.camPos.x, camera.camPos.y, camera.camPos.z);
 
 		glBindVertexArray(cubeVAO);
@@ -562,7 +583,7 @@ int main()//fgh
 		refractionShader.USE();
 		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
-		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(cubesModel));
 		glUniform3f(glGetUniformLocation(refractionShader.Program, "cameraPos"), camera.camPos.x, camera.camPos.y, camera.camPos.z);
 
 		glBindVertexArray(cubeVAO);
@@ -571,10 +592,11 @@ int main()//fgh
 
 
 		multiShader.USE();
+		spaceship.Draw(shader);
 		glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
 		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
-
-		glUniform3f(glGetUniformLocation(multiShader.Program, "viewPos"), cam.camPos.x, cam.camPos.y, cam.camPos.z);
+		//m1.Draw(shader);
+		glUniform3f(glGetUniformLocation(multiShader.Program, "viewPos"), camera.camPos.x, camera.camPos.y, camera.camPos.z);
 		//directional
 		glUniform3f(glGetUniformLocation(multiShader.Program, "dirLight.direction"), -2.f, 5.f, -2.f);
 		glUniform3f(glGetUniformLocation(multiShader.Program, "dirLight.ambient"), 0.4f, 0.4f, 0.4f);
@@ -638,11 +660,10 @@ int main()//fgh
 		bigC.Move(cubPos);
 		bigC.Rotate(cubRot);
 
-		bigC.Draw();
-		bigCube.Draw();
+		//bigC.Draw(); cubo blau
+		//bigCube.Draw();
 
 		miniCubo1.USE();
-
 		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "model"), 1, GL_FALSE, glm::value_ptr(miniCube.GetModelMatrix())); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniView3, 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniProj3, 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
@@ -669,6 +690,14 @@ int main()//fgh
 		pointCube1.Draw();
 
 		
+		
+
+		//sphere.Draw(whiteStar);
+		glUniformMatrix4fv(glGetUniformLocation(whiteStar.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); // transferir el que val model al uniform on apunta uniModel
+		glUniformMatrix4fv(glGetUniformLocation(whiteStar.Program, "view"), 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
+		glUniformMatrix4fv(glGetUniformLocation(whiteStar.Program, "proj"), 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
+
+		
 
 		// Swap the buffers
 		glfwSwapBuffers(window);
@@ -678,14 +707,6 @@ int main()//fgh
 	return 0;
 }
 
-// Loads a cubemap texture from 6 individual texture faces
-// Order should be:
-// +X (right)
-// -X (left)
-// +Y (top)
-// -Y (bottom)
-// +Z (front)
-// -Z (back)
 GLuint loadCubemap(vector<const GLchar*> faces)
 {
 	GLuint textureID;
@@ -712,9 +733,7 @@ GLuint loadCubemap(vector<const GLchar*> faces)
 }
 
 
-// This function loads a texture from file. Note: texture loading functions like these are usually 
-// managed by a 'Resource Manager' that manages all resources (like textures, models, audio). 
-// For learning purposes we'll just define it as a utility function.
+
 GLuint loadTexture(GLchar* path)
 {
 	//Generate texture ID and load texture data 
@@ -808,52 +827,52 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	//mover cubo grande 
 	else if (key == GLFW_KEY_I && action == GLFW_PRESS)
-		cubPos.y = 0.01f;
+		cubPos.y = 0.1f;
 	else if (key == GLFW_KEY_I && action == GLFW_RELEASE)
 		cubPos.y = 0.f;
 
 	else if (key == GLFW_KEY_K && action == GLFW_PRESS)
-		cubPos.y = -0.01f;
+		cubPos.y = -0.1f;
 	else if (key == GLFW_KEY_K && action == GLFW_RELEASE)
 		cubPos.y = 0.f;
 
 	else if (key == GLFW_KEY_J && action == GLFW_PRESS)
-		cubPos.x = 0.01f;
+		cubPos.x = 0.1f;
 	else if (key == GLFW_KEY_J && action == GLFW_RELEASE)
 		cubPos.x = 0.f;
 
 	else if (key == GLFW_KEY_L && action == GLFW_PRESS)
-		cubPos.x = -0.01f;
+		cubPos.x = -0.1f;
 	else if (key == GLFW_KEY_L && action == GLFW_RELEASE)
 		cubPos.x = 0.f;
 
 	else if (key == GLFW_KEY_U && action == GLFW_PRESS)
-		cubPos.z = 0.01f;
+		cubPos.z = 0.1f;
 	else if (key == GLFW_KEY_U && action == GLFW_RELEASE)
 		cubPos.z = 0.f;
 
 	else if (key == GLFW_KEY_O && action == GLFW_PRESS)
-		cubPos.z = -0.01f;
+		cubPos.z = -0.1f;
 	else if (key == GLFW_KEY_O && action == GLFW_RELEASE)
 		cubPos.z = 0.f;
 
 	else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
-		cubRot.y = 0.15f;
+		cubRot.y = 1.f;
 	else if (key == GLFW_KEY_RIGHT && action == GLFW_RELEASE)
 		cubRot.y = 0.f;
 
 	else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
-		cubRot.y = -0.15f;
+		cubRot.y = -1.0f;
 	else if (key == GLFW_KEY_LEFT && action == GLFW_RELEASE)
 		cubRot.y = 0.f;
 
 	else if (key == GLFW_KEY_UP && action == GLFW_PRESS)
-		cubRot.x = -0.15f;
+		cubRot.x = -1.0f;
 	else if (key == GLFW_KEY_UP && action == GLFW_RELEASE)
 		cubRot.x = 0.f;
 
 	else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
-		cubRot.x = 0.15f;
+		cubRot.x = 1.0f;
 	else if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE)
 		cubRot.x = 0.f;
 
@@ -862,6 +881,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	else if ((key == GLFW_KEY_2 && action == GLFW_PRESS)) {
 		skyboxText = 2;
+	}
+
+	else if ((key == GLFW_KEY_3 && action == GLFW_PRESS)) {
+		skyboxText = 3;
 	}
 }
 
