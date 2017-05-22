@@ -481,6 +481,9 @@ int main()//fgh
 	glm::mat4 model = glm::mat4(1.0);
 	glm::mat4 proj;
 	glm::mat4 cubesModel = glm::mat4(1.0);
+	glm::mat4 cubesModel2 = glm::mat4(1.0);
+	glm::mat4 sphereModel = glm::mat4(1.0);
+
 	
 	GLfloat radio = 8.0f;
 
@@ -515,6 +518,11 @@ int main()//fgh
 	bigCube.Scale(glm::vec3(5.f, 5.f, 5.f));
 	transp.Move(glm::vec3(0.f, 0.f, 0.f));
 	cubesModel = glm::translate(cubesModel, glm::vec3(-4.0f, 0.f, 0.f));
+	cubesModel2 = glm::translate(cubesModel2, glm::vec3(-2.0f, -2.f, -2.f));	
+	sphereModel = glm::translate(sphereModel, lightPositions[0]);
+
+	sphereModel = glm::scale(sphereModel, glm::vec3(0.005f, 0.005f, 0.005f));
+
 
 	// Game loop
 	while (!glfwWindowShouldClose(window))
@@ -583,7 +591,7 @@ int main()//fgh
 		refractionShader.USE();
 		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
-		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(cubesModel));
+		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(cubesModel2));
 		glUniform3f(glGetUniformLocation(refractionShader.Program, "cameraPos"), camera.camPos.x, camera.camPos.y, camera.camPos.z);
 
 		glBindVertexArray(cubeVAO);
@@ -662,17 +670,20 @@ int main()//fgh
 
 		//bigC.Draw(); cubo blau
 		//bigCube.Draw();
-
+		whiteStar.USE();
+		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "model"), 1, GL_FALSE, glm::value_ptr(sphereModel)); // transferir el que val model al uniform on apunta uniModel
+		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "view"), 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
+		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "proj"), 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
+																												//spotCube1.Draw();
+		sphere.Draw(whiteStar);
 		miniCubo1.USE();
-		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "model"), 1, GL_FALSE, glm::value_ptr(miniCube.GetModelMatrix())); // transferir el que val model al uniform on apunta uniModel
+		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "model"), 1, GL_FALSE, glm::value_ptr(sphereModel)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniView3, 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniProj3, 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
-		miniCube.Draw();
+		//miniCube.Draw();
 
-		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "model"), 1, GL_FALSE, glm::value_ptr(spotCube1.GetModelMatrix())); // transferir el que val model al uniform on apunta uniModel
-		glUniformMatrix4fv(uniView3, 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
-		glUniformMatrix4fv(uniProj3, 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
-		spotCube1.Draw();
+		
+
 
 		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "model"), 1, GL_FALSE, glm::value_ptr(spotCube2.GetModelMatrix())); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniView3, 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
@@ -692,8 +703,7 @@ int main()//fgh
 		
 		
 
-		//sphere.Draw(whiteStar);
-		glUniformMatrix4fv(glGetUniformLocation(whiteStar.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); // transferir el que val model al uniform on apunta uniModel
+		glUniformMatrix4fv(glGetUniformLocation(whiteStar.Program, "model"), 1, GL_FALSE, glm::value_ptr(sphereModel)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(glGetUniformLocation(whiteStar.Program, "view"), 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(glGetUniformLocation(whiteStar.Program, "proj"), 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
 

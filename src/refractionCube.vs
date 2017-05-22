@@ -11,7 +11,7 @@ uniform mat4 proj;
 
 void main()
 {
-    gl_Position = proj * view * model * vec4(position.x - 2.f, position.y - 2.f, position.z - 2.f, 1.0f);
+    gl_Position = proj * view * model * vec4(position, 1.0f);
     Normal = mat3(transpose(inverse(model))) * normal;
     Position = vec3(model * vec4(position, 1.0f));
 } 
