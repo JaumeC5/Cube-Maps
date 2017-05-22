@@ -44,6 +44,8 @@ bool firstMouse = true;
 GLfloat lastX = 400, lastY = 300;
 bool mo1, mo2, mo3 = false;
 
+float index = 1.33;
+
 int skyboxText = 1;
 
 // Function prototypes
@@ -133,8 +135,8 @@ int main()//fgh
 	glm::vec3 lightPositions[] = {
 		glm::vec3(1.f,  1.f,  0.0f),
 		glm::vec3(2.f, 1.f, 0.0f),
-		glm::vec3(3.0f,  1.0f, 0.0f),
-		glm::vec3(4.0f,  1.0f, 0.0f),
+		glm::vec3(3.5f,  1.0f, 0.0f),
+		glm::vec3(3.75f,  1.0f, 0.0f),
 		glm::vec3(5.0f,  1.0f, 0.0f)
 
 	};
@@ -156,6 +158,7 @@ int main()//fgh
 	//Model m3("./Models/m3/dog.obj");
 	Model sphere("./Models/sphere/sphere.obj");
 	Model spaceship("./Models/sp/voyager.obj");
+	Model ufo("Models/ufo/flying Disk flying.obj");
 #endif
 	// Definir el buffer de vertices
 
@@ -484,6 +487,8 @@ int main()//fgh
 	glm::mat4 cubesModel2 = glm::mat4(1.0);
 	glm::mat4 sphereModel = glm::mat4(1.0);
 
+	glm::mat4 ship2 = glm::mat4(1.0);
+
 	
 	GLfloat radio = 8.0f;
 
@@ -522,8 +527,8 @@ int main()//fgh
 	sphereModel = glm::translate(sphereModel, lightPositions[0]);
 
 	sphereModel = glm::scale(sphereModel, glm::vec3(0.005f, 0.005f, 0.005f));
-
-
+	ship2 = glm::translate(ship2, lightPositions[3]);
+	ship2 = glm::scale(ship2, glm::vec3(0.003f, 0.003f, 0.003f));
 	// Game loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -573,6 +578,8 @@ int main()//fgh
 
 		view = camera.LookAt();
 
+		
+
 
 		//Reflection Cube
 		shader.USE();
@@ -586,6 +593,10 @@ int main()//fgh
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
+		if (index <= 1)
+			index = 1;
+		if (index >= 2)
+			index = 2;
 
 		//Refraction Cube
 		refractionShader.USE();
@@ -593,21 +604,27 @@ int main()//fgh
 		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
 		glUniformMatrix4fv(glGetUniformLocation(refractionShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(cubesModel2));
 		glUniform3f(glGetUniformLocation(refractionShader.Program, "cameraPos"), camera.camPos.x, camera.camPos.y, camera.camPos.z);
+		glUniform1f(glGetUniformLocation(refractionShader.Program, "ratio"), 1/index);
 
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
 
-		multiShader.USE();
-		spaceship.Draw(shader);
+		multiShader.USE();		
+
+		glUniformMatrix4fv(glGetUniformLocation(multiShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
+		glUniformMatrix4fv(glGetUniformLocation(multiShader.Program, "proj"), 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
+		glUniformMatrix4fv(glGetUniformLocation(multiShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(ship2)); // transferir el que val model al uniform on apunta uniModel
+		ufo.Draw(modelShader);
+
 		glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
 		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
 		//m1.Draw(shader);
 		glUniform3f(glGetUniformLocation(multiShader.Program, "viewPos"), camera.camPos.x, camera.camPos.y, camera.camPos.z);
 		//directional
-		glUniform3f(glGetUniformLocation(multiShader.Program, "dirLight.direction"), -2.f, 5.f, -2.f);
-		glUniform3f(glGetUniformLocation(multiShader.Program, "dirLight.ambient"), 0.4f, 0.4f, 0.4f);
+		glUniform3f(glGetUniformLocation(multiShader.Program, "dirLight.direction"), 0.f, 0.f, 2.f);
+		glUniform3f(glGetUniformLocation(multiShader.Program, "dirLight.ambient"), 0.8f, 0.8f, 0.8f);
 		glUniform3f(glGetUniformLocation(multiShader.Program, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
 		glUniform3f(glGetUniformLocation(multiShader.Program, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
 		// Point light 1
@@ -658,7 +675,10 @@ int main()//fgh
 		glUniformMatrix4fv(uniView8, 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniProj8, 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(glGetUniformLocation(multiShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(bigC.GetModelMatrix())); // transferir el que val model al uniform on apunta uniModel
-		//activar texturas cubo de luz
+		spaceship.Draw(shader);
+
+		
+																																	//activar texturas cubo de luz
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
 
@@ -676,8 +696,12 @@ int main()//fgh
 		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "proj"), 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
 																												//spotCube1.Draw();
 		sphere.Draw(whiteStar);
+
+		modelShader.USE();
+		
+
 		miniCubo1.USE();
-		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "model"), 1, GL_FALSE, glm::value_ptr(sphereModel)); // transferir el que val model al uniform on apunta uniModel
+		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "model"), 1, GL_FALSE, glm::value_ptr(ship2)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniView3, 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniProj3, 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
 		//miniCube.Draw();
@@ -685,12 +709,13 @@ int main()//fgh
 		
 
 
-		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "model"), 1, GL_FALSE, glm::value_ptr(spotCube2.GetModelMatrix())); // transferir el que val model al uniform on apunta uniModel
+		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "model"), 1, GL_FALSE, glm::value_ptr(sphereModel)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniView3, 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniProj3, 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
-		spotCube2.Draw();
 
-		glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "model"), 1, GL_FALSE, glm::value_ptr(pointCube2.GetModelMatrix())); // transferir el que val model al uniform on apunta uniModel
+																		 //spotCube2.Draw();
+
+	/*	glUniformMatrix4fv(glGetUniformLocation(miniCubo1.Program, "model"), 1, GL_FALSE, glm::value_ptr(pointCube2.GetModelMatrix())); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniView3, 1, GL_FALSE, glm::value_ptr(view)); // transferir el que val model al uniform on apunta uniModel
 		glUniformMatrix4fv(uniProj3, 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
 		pointCube2.Draw();
@@ -700,7 +725,7 @@ int main()//fgh
 		glUniformMatrix4fv(uniProj3, 1, GL_FALSE, glm::value_ptr(proj)); // transferir el que val model al uniform on apunta uniModel
 		pointCube1.Draw();
 
-		
+		*/
 		
 
 		glUniformMatrix4fv(glGetUniformLocation(whiteStar.Program, "model"), 1, GL_FALSE, glm::value_ptr(sphereModel)); // transferir el que val model al uniform on apunta uniModel
@@ -896,6 +921,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	else if ((key == GLFW_KEY_3 && action == GLFW_PRESS)) {
 		skyboxText = 3;
 	}
+	else if(key == GLFW_KEY_KP_ADD&& action == GLFW_PRESS)
+		index += 0.1;
+	else if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_PRESS)
+		index -= 0.1;
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)

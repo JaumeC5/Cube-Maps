@@ -5,10 +5,10 @@ out vec4 color;
 
 uniform vec3 cameraPos;
 uniform samplerCube skybox;
-
+uniform float ratio;
 void main()
 {             
-    float ratio = 1.00 / 1.33;
+    //float ratio = 1.00 / 1.33;
     vec3 I = normalize(Position - cameraPos);
     vec3 R = refract(I, normalize(Normal), ratio);
     color = texture(skybox, R);
